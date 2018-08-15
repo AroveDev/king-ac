@@ -34,7 +34,7 @@ command /king [<text>] [<offline player>]:
 	aliases: /anticheat, /kac, /kingac, /kinganticheat
 	trigger:
 		if arg-1 is not set:
-			set {King.Files.Version} to "v. 0.3.7, b. 950"
+			set {King.Files.Version} to "v. 0.3.7, b. 1"
 			set {King.Files.Contact} to "arovedev@wp.pl"
 			set {King.Files.Main} to random integer from 0 to 99999
 			
