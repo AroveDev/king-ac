@@ -1,0 +1,1034 @@
+options:
+	#KillAura Heuristics | Na ile % heurystyka musi byc pewna o wykryciu killaury aby gracz zostal wykryty? Analiza potrafi wykryc KAZDA killaure (Min. 0, Max. 100 | Rekomendowane: 35, Testowane: 50)
+	King.Settings.MinConfidence: 35
+	
+	#KillAura Packets | Czy chcesz aby King pakietow do wykrycia killaury? Pakiety wykrywaja podstawowe, proste killaury. (Min. false, Max. true | Rekomendowane: true, Testowane: true)
+	King.Settings.KAPackets: true
+	
+	#Actions Rotations | Czy chcesz aby King stosowal obliczenia prawidlowych rotacji dla danego bloku? Jak dokladny ma byc King w swoich obliczeniach? Wieksza wartosc tolerance sprawi ze King nie bedzie tolerowal inncyh rotacji, zmniejszy sie prog tolerancji (Min. 0, Max. 100 | Rekomendowane: 0, Testowane: 5)
+	King.Settings.Interacts: true
+	King.Settings.Interacts-Tolerance: 0
+	
+	#Actions Interacts | Do jakiej maksymalnej odleglosci moze dojsc podczas interakcji z blokiem? (Min. 1, Max. 6 | Rekomendowane: 4.6, Testowane: 4.6)
+	King.Settings.MaxInteractDistance: 5.5
+	
+	#Speed Tolerance | Jaki maksymalny dystans moze przemiezyc gracz podczas 1 ruchu? (Min. 0.01, Max. 4.5 | Rekomendowane: 0.34, Testowane: 0.34)
+	King.Settings.MaxSpeed: 0.34
+	
+	#FastPlace Time | W jakim minimalnym odstepie czasowym gracz moze polozyc kolejny blok? (Min. 0 seconds, Max. 2 seconds | Rekomendowane: 0.03 seconds, Testowane: 0.05 seconds) [1 tick = 0.05 seconds, 1 miliseconds (ms) = 0.001 seconds]
+	King.Settings.PlaceTime: 0.05 seconds
+	
+	#BadPackets C05 | Ile gracz moze wyslac maksymalnie pakietow lokacyjnych (C05PacketPlayer()) podczas 20 tickow? (Min. 1, Max. NaN | Rekomendowane: 22, Testowane: 23) [1 tick = 0.05 seconds, 1 miliseconds (ms) = 0.001 seconds]
+	King.Settings.MaxPackets: 22
+	
+	#BadPackets C17 | W jakim minimalnym odstepie czasowym gracz moze wysylac wiadomosci? (Min. 0 seconds, Max. NaN seconds | Rekomendowane: 6 ticks, Testowane: 6 ticks) [1 tick = 0.05 seconds, 1 miliseconds (ms) = 0.001 seconds]
+	King.Settings.NextMessageTime: 6 ticks
+	
+	#King Prefix | Jakie logo ma posiadac AntiCheat? Prefix pojawia sie przy kazdej wiadomosci! (Uzyj: "%{King.Floats.Color.Type}%" by uzyc glownego koloru.)
+	King.Settings.Prefix: &9&l⌈ %{King.Floats.Color.Type}%King&r&5™ &c&l⌋ &f&l•
+	
+command /king [<text>] [<offline player>]:
+	description: Pokazuje informacje o skrypcie.
+	executable by: players and console
+	usage: /King
+	aliases: /anticheat, /kac, /kingac, /kinganticheat
+	trigger:
+		if arg-1 is not set:
+			set {King.Files.Version} to "v. 0.3.7, b. 950"
+			set {King.Files.Contact} to "arovedev@wp.pl"
+			set {King.Files.Main} to random integer from 0 to 99999
+			
+			send "{@King.Settings.Prefix} &7King AntiCheat (%{King.Files.Version}%)" to executor
+			send "{@King.Settings.Prefix} %{King.Floats.Color.Type}%Kontakt &f: &7%{King.Files.Contact}%, %{King.Floats.Color.Type}%ID &f: &7%{King.Files.Main}%" to executor
+			
+			if player is op:
+				send "{@King.Settings.Prefix} &7Wpisz /king pomoc by uzyskac komendy!" to player
+				stop
+			else:
+				stop
+		else if arg-1 is set:
+			if arg-1 is "pomoc":
+				if arg-2 is not set:
+					if player is op:
+						send "{@King.Settings.Prefix} %{King.Floats.Color.Type}%/king menu &7wyswietla menu anticheata." to executor
+						send "{@King.Settings.Prefix} %{King.Floats.Color.Type}%/king kick <gracz> &7wyrzuca gracza z serwera." to executor
+						send "{@King.Settings.Prefix} %{King.Floats.Color.Type}%/king ban <gracz> &7banuje gracza na serwerze." to executor
+						send "{@King.Settings.Prefix} %{King.Floats.Color.Type}%/king unban <graczr> &7odbanowuje gracza na serwerze." to executor
+						send "{@King.Settings.Prefix} %{King.Floats.Color.Type}%/king zglos <gracz> &7zglasza gracza o cheaty." to executor
+						stop
+					else:
+						send "{@King.Settings.Prefix} %{King.Floats.Color.Type}%/king zglos <gracz> &7zglasza gracza o cheaty." to executor
+						stop
+				else:
+					send "{@King.Settings.Prefix} &7Niepoprawne argumenty." to executor
+					stop
+			else if arg-1 is "zglos":
+				if arg-2 is set:
+					if arg-2 is online:
+						if arg-2 is not name of player:
+							wait 1 tick
+							send "{@King.Settings.Prefix} &7Gracz %executor% zglosil gracza %arg-2% za Cheaty!" to all ops
+							stop
+						else:
+							send "{@King.Settings.Prefix} &7Nie mozesz zglosic samego siebie ('-')" to executor
+							stop
+					else:
+						send "{@King.Settings.Prefix} &7Gracz nie jest on-line." to executor
+						stop
+				else:
+					send "{@King.Settings.Prefix} &7Niepoprawne argumenty." to executor
+					stop
+			else if arg-1 is "kick":
+				if arg-2 is set:
+					if arg-2 is online:
+						if executor is op:
+							kick the arg-2 due to "{@King.Settings.Prefix} &7Zostales wyrzucony z serwera przez %executor%!"
+							stop
+						else:
+							send "{@King.Settings.Prefix} &7Nie mozesz uzyc tej komendy." to executor
+							stop
+					else:
+						send "{@King.Settings.Prefix} &7Gracz nie jest on-line." to executor
+						stop
+				else:
+					send "{@King.Settings.Prefix} &7Niepoprawne argumenty." to executor
+					stop
+			else if arg-1 is "ban":
+				if arg-2 is set:
+					if arg-2 is online:
+						if executor is op:
+							set {King.Booleans.PlayerWasBanned.%arg-2%} to true
+							kick the arg-2 due to "{@King.Settings.Prefix} &7Zostales zbanowany na serwerze przez %{King.Floats.Color.Type}%[%executor%]"
+							stop
+						else:
+							send "{@King.Settings.Prefix} &7Nie mozesz uzyc tej komendy." to executor
+							stop
+					else:
+						send "{@King.Settings.Prefix} &7Gracz nie jest on-line." to executor
+						stop
+				else:
+					send "{@King.Settings.Prefix} &7Niepoprawne argumenty." to executor
+					stop
+			else if arg-1 is "unban":
+				if arg-2 is set:
+					if {King.Booleans.PlayerWasBanned.%arg-2%} is true:
+						if executor is op:
+							set {King.Booleans.PlayerWasBanned.%arg-2%} to false
+							send "{@King.Settings.Prefix} &7Odbanowales gracza %arg-2%." to executor
+							stop
+						else:
+							send "{@King.Settings.Prefix} &7Nie mozesz uzyc tej komendy." to executor
+							stop
+					else:
+						send "{@King.Settings.Prefix} &7Gracz nigdy nie zostal zbanowany." to executor
+						stop
+				else:
+					send "{@King.Settings.Prefix} &7Niepoprawne argumenty." to executor
+					stop
+			else if arg-1 is "menu":
+				if arg-2 is not set:
+					if executor is op:
+						wait 1 tick
+						open chest with 3 rows named "%{King.Floats.Color.Type}%Menu AntiCheata" to executor
+						wait 1 tick
+						format slot 16 of executor with book named "%{King.Floats.Color.Type}%Zgloszeni gracze" with lore "%{King.Floats.Color.Type}%Kliknij by wyzerowac ||&7(%{King.Groups.ReportedPlayers::*}%)" to run [clear {King.Groups.ReportedPlayers::*}]->[execute player command "king menu"]
+						format slot 13 of executor with nether star named "&7Witaj %{King.Floats.Color.Type}%%executor%!" with lore "&7King AntiCheat ||&7 ||&7------------------------------- ||&7 ||&7Obecna wersja : %{King.Floats.Color.Type}%%{King.Files.Version}% ||&7 ||&7------------------------------- ||&7 ||&7AntiCheat jest automatycznie aktualizowany ||&7wiec nie martw sie korzystasz z starszej wersji! ||&7 ||&7------------------------------- ||&7 ||%{King.Floats.Color.Type}%Nowosci : ||&7 ||&7------------------------------- ||&7 ||&7- %{King.Floats.Color.Type}%Dodano &7GUI (Menu) ||&7- %{King.Floats.Color.Type}%Dodano &7wiecej opcji kolorow ||&7- %{King.Floats.Color.Type}%Naprawiono &7check Heuristics ||&7 ||&7------------------------------- ||&7 ||&7AntiCheat jest stale dopracowywany przez : ||&cAroveDev (Tworca)&7, &6undestroyy (Pomocnik) ||&aMrScaff (Tester)&7, &aLilFlux (Tester)&7 ||&7 ||&7-------------------------------" to be unstealable
+						format slot 10 of executor with diamond sword named "%{King.Floats.Color.Type}%Opcje" with lore "&7Wyswietla zakladke opcji, w ktorej mozesz ||&7zmienic kolor AntiCheata, ustawic powiadomienia ||&7oraz wlaczyc lub wylaczyc sprawdzanie ||&7cheatow." to run [execute player command "king opcje"]
+						stop
+					else:
+						send "{@King.Settings.Prefix} &7Nie mozesz uzyc tej komendy." to executor
+						stop
+				else:
+					send "{@King.Settings.Prefix} &7Niepoprawne argumenty." to executor
+					stop
+			else if arg-1 is "opcje":
+				if arg-2 is not set:
+					if executor is op:
+						wait 1 tick
+						open chest with 5 rows named "%{King.Floats.Color.Type}%Opcje AntiCheata" to executor
+						wait 1 tick
+						if {King.Checks.KillAura.Enabled} is not true:
+							wait 1 tick
+							format slot 10 of executor with gray dye named "%{King.Floats.Color.Type}%KillAura &7Wyl." with lore "&7AntiCheat analizuje kazde uderzenie gracza ||&7zadane w cel. Stosuje rozne metody wykrycia Killaury ||&7dopasowujac wzory uderzen lub analizujac rotacje ||&7AntiCheat nie wspomaga sie botami wiec mozesz dodac swoje! " to run [set {King.Checks.KillAura.Enabled} to true]->[execute player command "king opcje"]
+						else:
+							wait 1 tick
+							format slot 10 of executor with iron sword named "%{King.Floats.Color.Type}%KillAura &7Wl." with lore "&7AntiCheat analizuje kazde uderzenie gracza ||&7zadane w cel. Stosuje rozne metody wykrycia Killaury ||&7dopasowujac wzory uderzen lub analizujac rotacje ||&7AntiCheat nie wspomaga sie botami wiec mozesz dodac swoje! " to run [set {King.Checks.KillAura.Enabled} to false]->[execute player command "king opcje"]
+						if {King.Checks.Actions.Enabled} is not true:
+							wait 1 tick
+							format slot 11 of executor with gray dye named "%{King.Floats.Color.Type}%Actions &7Wyl." with lore "&7AntiCheat sprawdza sposoby i warunki w ||&7jakich gracz wykonuje interakcje analizujac ||&7rotacje gracza (Scaffold), akcje w czasie jedzenia lub ||&7otwierania ekwipunku (NoSlow, InvMove). Stosuje wzory atan2, abs do obliczenia ||&7prawidlowej rotacji do danego bloku." to run [set {King.Checks.Actions.Enabled} to true]->[execute player command "king opcje"]
+						else:
+							wait 1 tick
+							format slot 11 of executor with white wool named "%{King.Floats.Color.Type}%Actions &7Wl." with lore "&7AntiCheat sprawdza sposoby i warunki w ||&7jakich gracz wykonuje interakcje analizujac ||&7rotacje gracza (Scaffold), akcje w czasie jedzenia lub ||&7otwierania ekwipunku (NoSlow, InvMove). Stosuje wzory atan2, abs do obliczenia ||&7prawidlowej rotacji do danego bloku." to run [set {King.Checks.Actions.Enabled} to false]->[execute player command "king opcje"]
+						if {King.Checks.Fly.Enabled} is not true:
+							wait 1 tick
+							format slot 12 of executor with gray dye named "%{King.Floats.Color.Type}%Fly &7Wyl." with lore "&7AntiCheat analizuje pozycje gracza na osi Y ||&7dopasowujac je do ruchow normalnego gracza" to run [set {King.Checks.Fly.Enabled} to true]->[execute player command "king opcje"]
+						else:
+							wait 1 tick
+							format slot 12 of executor with feather named "%{King.Floats.Color.Type}%Fly &7Wl." with lore "&7AntiCheat analizuje pozycje gracza na osi Y ||&7dopasowujac je do ruchow normalnego gracza" to run [set {King.Checks.Fly.Enabled} to false]->[execute player command "king opcje"]
+						if {King.Checks.Speed.Enabled} is not true:
+							wait 1 tick
+							format slot 13 of executor with gray dye named "%{King.Floats.Color.Type}%Speed &7Wyl." with lore "&7AntiCheat analizuje pozycje gracza na osi XZ ||&7dopasowujac je do ruchow normalnego gracza ||&7oraz redukujac jego szybkosc ||&7(Check nie dziala perfekcyjnie, wlaczasz na wlasna odpowiedzialnosc)" to run [set {King.Checks.Speed.Enabled} to true]->[execute player command "king opcje"]
+						else:
+							wait 1 tick
+							format slot 13 of executor with speed potion named "%{King.Floats.Color.Type}%Speed &7Wl." with lore "&7AntiCheat analizuje pozycje gracza na osi XZ ||&7dopasowujac je do ruchow normalnego gracza ||&7oraz redukujac jego szybkosc ||&7(Check nie dziala perfekcyjnie, wlaczasz na wlasna odpowiedzialnosc)" to run [set {King.Checks.Speed.Enabled} to false]->[execute player command "king opcje"]
+						if {King.Checks.NoFall.Enabled} is not true:
+							wait 1 tick
+							format slot 14 of executor with gray dye named "%{King.Floats.Color.Type}%NoFall &7Wyl." with lore "&7AntiCheat sprawdza czy gracz probuje uniknac ||&7obrazen od upadku " to run [set {King.Checks.NoFall.Enabled} to true]->[execute player command "king opcje"]
+						else:
+							wait 1 tick
+							format slot 14 of executor with leather boots named "%{King.Floats.Color.Type}%NoFall &7Wl." with lore "&7AntiCheat sprawdza czy gracz probuje uniknac ||&7obrazen od upadku " to run [set {King.Checks.NoFall.Enabled} to false]->[execute player command "king opcje"]
+						if {King.Checks.BadPackets.Enabled} is not true:
+							wait 1 tick
+							format slot 15 of executor with gray dye named "%{King.Floats.Color.Type}%BadPackets &7Wyl." with lore "&7AntiCheat nadzoruje ilosc wysylanych pakietow oraz ||&7ich metadane. Sprawdza w jakich okolicznosciach zostaly wyslane itp." to run [set {King.Checks.BadPackets.Enabled} to true]->[execute player command "king opcje"]
+						else:
+							wait 1 tick
+							format slot 15 of executor with arrow named "%{King.Floats.Color.Type}%BadPackets &7Wl." with lore "&7AntiCheat nadzoruje ilosc wysylanych pakietow oraz ||&7ich metadane. Sprawdza w jakich okolicznosciach zostaly wyslane itp." to run [set {King.Checks.BadPackets.Enabled} to false]->[execute player command "king opcje"]
+						if {King.Booleans.Notify.Enabled} is not true:
+							wait 1 tick
+							format slot 28 of executor with gray dye named "%{King.Floats.Color.Type}%Wiadomosci &7Wyl." with lore "&7AntiCheat nie wyswietla wiadomosci o ||&7cheaterach i zgloszeniach" to run [set {King.Booleans.Notify.Enabled} to true]->[execute player command "king opcje"]
+						else:
+							wait 1 tick
+							format slot 28 of executor with paper named "%{King.Floats.Color.Type}%Wiadomosci &7Wl." with lore "&7AntiCheat nie wyswietla wiadomosci o ||&7cheaterach i zgloszeniach" to run [set {King.Booleans.Notify.Enabled} to false]->[execute player command "king opcje"]
+						if {King.Booleans.WhatDoAfterVL} is "Kick":
+							wait 1 tick
+							format slot 29 of executor with golden axe named "%{King.Floats.Color.Type}%Wyrzucanie" with lore "&7Co King ma zrobic z potencjalymi cheaterami? ||&7(Kliknij aby zmienic)" to run [set {King.Booleans.WhatDoAfterVL} to "Ban"]->[execute player command "king opcje"]
+						else if {King.Booleans.WhatDoAfterVL} is "Ban":
+							wait 1 tick
+							format slot 29 of executor with diamond axe named "%{King.Floats.Color.Type}%Banowanie" with lore "&7Co King ma zrobic z potencjalymi cheaterami? ||&7(Kliknij aby zmienic)" to run [set {King.Booleans.WhatDoAfterVL} to "Nothing"]->[execute player command "king opcje"]
+						else if {King.Booleans.WhatDoAfterVL} is "Nothing":
+							wait 1 tick
+							format slot 29 of executor with wood axe named "%{King.Floats.Color.Type}%Nic" with lore "&7Co King ma zrobic z potencjalymi cheaterami? ||&7(Kliknij aby zmienic)" to run [set {King.Booleans.WhatDoAfterVL} to "Kick"]->[execute player command "king opcje"]
+						else if {King.Booleans.WhatDoAfterVL} is not set:
+							wait 1 tick
+							format slot 29 of executor with golden axe named "%{King.Floats.Color.Type}%Kick" with lore "&7Co King ma zrobic z potencjalymi cheaterami? ||&7(Kliknij aby zmienic)" to run [set {King.Booleans.WhatDoAfterVL} to "Ban"]->[execute player command "king opcje"]
+						if {King.Booleans.GhostMode.Enabled} is not true:
+							wait 1 tick
+							format slot 30 of executor with gray dye named "%{King.Floats.Color.Type}%GhostMode &7Wyl." with lore "&7AntiCheat nie bedzie zadnych oznak po sobie. ||&7Nie bedzie teleportowal i blokowal potencjalych cheaterow ||&7dzieki czemu gracze pomysla ze serwer go nie posiada. ||&7Pomaga to na niskim TPS (Ticks per second) zlapac cheatera." to run [set {King.Booleans.GhostMode.Enabled} to true]->[execute player command "king opcje"]
+						else:
+							wait 1 tick
+							format slot 30 of executor with trapdoor named "%{King.Floats.Color.Type}%GhostMode &7Wl." with lore "&7AntiCheat nie bedzie zadnych oznak po sobie. ||&7Nie bedzie teleportowal i blokowal potencjalych cheaterow ||&7dzieki czemu gracze pomysla ze serwer go nie posiada. ||&7Pomaga to na niskim TPS (Ticks per second) zlapac cheatera." to run [set {King.Booleans.GhostMode.Enabled} to false]->[execute player command "king opcje"]
+						if {King.Floats.Color.Type} is "&d":
+							wait 1 tick
+							format slot 31 of executor with pink stained glass pane named "%{King.Floats.Color.Type}%Kolor - &5Rozowy" with lore "&7Zmienia glowny kolor AntiCheata" to run [set {King.Floats.Color.Type} to "&c"]->[execute player command "king opcje"]
+						else if {King.Floats.Color.Type} is "&c":
+							wait 1 tick
+							format slot 31 of executor with red stained glass pane named "%{King.Floats.Color.Type}%Kolor - &cCzerwony" with lore "&7Zmienia glowny kolor AntiCheata" to run [set {King.Floats.Color.Type} to "&e"]->[execute player command "king opcje"]
+						else if {King.Floats.Color.Type} is "&e":
+							wait 1 tick
+							format slot 31 of executor with yellow stained glass pane named "%{King.Floats.Color.Type}%Kolor - &6Zolty" with lore "&7Zmienia glowny kolor AntiCheata" to run [set {King.Floats.Color.Type} to "&a"]->[execute player command "king opcje"]
+						else if {King.Floats.Color.Type} is "&a":
+							wait 1 tick
+							format slot 31 of executor with green stained glass pane named "%{King.Floats.Color.Type}%Kolor - &2Zielony" with lore "&7Zmienia glowny kolor AntiCheata" to run [set {King.Floats.Color.Type} to "&b"]->[execute player command "king opcje"]
+						else if {King.Floats.Color.Type} is "&b":
+							wait 1 tick
+							format slot 31 of executor with blue stained glass pane named "%{King.Floats.Color.Type}%Kolor - &3Niebieski" with lore "&7Zmienia glowny kolor AntiCheata" to run [set {King.Floats.Color.Type} to "&d"]->[execute player command "king opcje"]
+						else:
+							wait 1 tick
+							format slot 31 of executor with pink stained glass pane named "%{King.Floats.Color.Type}%Kolor - &5Rozowy" with lore "&7Zmienia glowny kolor AntiCheata" to run [set {King.Floats.Color.Type} to "&c"]->[execute player command "king opcje"]
+						format slot 40 of executor with arrow named "%{King.Floats.Color.Type}%Wroc" to run [execute player command "king menu"]
+					else:
+						send "{@King.Settings.Prefix} &7Nie mozesz uzyc tej komendy." to executor
+						stop
+				else:
+					send "{@King.Settings.Prefix} &7Niepoprawne argumenty." to executor
+					stop
+			else:
+				send "{@King.Settings.Prefix} &7Niepoprawne argumenty." to executor
+				stop
+				
+function starterValues(p: player):
+	set {King.Booleans.FaslePositives.%{_p}%} to true
+	wait 3 seconds
+	set {King.Booleans.FaslePositives.%{_p}%} to false
+				
+function resetVL(p: player):
+	set {King.Checks.KillAura.VLLevel.%{_p}%} to 0
+	set {King.Checks.Actions.VLLevel.%{_p}%} to 0
+	set {King.Checks.Fly.VLLevel.%{_p}%} to 0
+	set {King.Checks.Speed.VLLevel.%{_p}%} to 0
+	set {King.Checks.Fly.VLLevel.%{_p}%} to 0
+	set {King.Checks.AutoClicker.VLLevel.%{_p}%} to 0
+	set {King.Checks.FastPlace.VLLevel.%{_p}%} to 0
+				
+on command "home" or "back": #Teleport  commands
+	starterValues(player)
+	
+
+on join:
+	if {King.Booleans.PlayerWasBanned.%player%} is true:
+		kick the player due to "{@King.Settings.Prefix} &7Zostales zbanowany na serwerze przez %{King.Floats.Color.Type}%[%executor%]"
+		stop
+	else:
+		stop
+	if {King.Booleans.FaslePositives.%player%} is not set:
+		set {King.Booleans.FaslePositives.%player%} to false
+	else:
+		stop
+	starterValues(player)
+			
+on packet:
+	if event-string is "PacketPlayInUseEntity":
+		player's gamemode is survival or adventure
+		{King.Checks.KillAura.Enabled} is true
+		add 1 to {King.Checks.KillAuraVanilla-H.%player%}
+		set {King.Checks.KillAura.PacketPitch1.%player%} to player's pitch
+		set {King.Checks.KillAura.PacketYaw1.%player%} to player's yaw
+		wait 1 tick
+		set {King.Checks.KillAura.PacketPitch2.%player%} to player's pitch
+		set {King.Checks.KillAura.PacketYaw2.%player%} to player's yaw
+		if player's pitch >= 90.01:
+			add 1 to {King.Checks.KillAura.VLLevel.%player%}
+			if {King.Booleans.Notify.Enabled} is true:
+				send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%KillAura&f(vl&f.%{King.Checks.KillAura.VLLevel.%player%}%) &f: Niemozliwe rotacje" to all ops
+		if player's pitch <= -90.01:
+			add 1 to {King.Checks.KillAura.VLLevel.%player%}
+			send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%KillAura&f(vl&f.%{King.Checks.KillAura.VLLevel.%player%}%) &f: Niemozliwe rotacje" to all ops
+		if {King.Checks.KillAura.PacketYaw1.%player%} - {King.Checks.KillAura.PacketYaw2.%player%} = 1 or 2 or 3 or 5 or 6 or 7 or 8 or 9 or 10 or 11 or 12 or 13 or 14 or 15 or 16 or 17 or 18 or 19 or 20 or 21 or 22 or 23 or 24 or 25:
+			add 1 to {King.Checks.KillAura.NaturalValues.%player%}
+			set {King.Doubles.KillAuraRate.%player%} to {King.Checks.KillAura.PacketYaw1.%player%} - {King.Checks.KillAura.PacketYaw2.%player%}
+			add {King.Doubles.KillAuraRate.%player%} to {:King.Groups.RotationsRate:}
+			if {King.Checks.KillAura.NaturalValues.%player%} >= 3:
+				add 1 to {King.Checks.KillAura.VLLevel.%player%}
+				if {King.Booleans.Notify.Enabled} is true:
+					send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%KillAura&f(vl&f.%{King.Checks.KillAura.VLLevel.%player%}%) &f: Rotacje gracza sa zbyt nagle (rate:%{:King.Groups.RotationsRate:}%)" to all ops
+				clear {:King.Groups.RotationsRate:}
+		if {King.Checks.KillAura.PacketPitch1.%player%} - {King.Checks.KillAura.PacketPitch2.%player%} != 0:
+			if {King.Checks.KillAura.PacketYaw1.%player%} - {King.Checks.KillAura.PacketYaw2.%player%} != 0:
+				add 1 to {King.Checks.HeuristicsFailRate.%player%}
+				stop
+				
+on leftclick:
+	player's gamemode is survival or adventure
+	{King.Checks.KillAura.Enabled} is true
+	add 1 to {King.Integers.LeftClicks.%player%}
+	add 1 to {King.Checks.AutoClicker.%player%}
+	if {King.Checks.HeuristicsFailRate.%player%} is not set:
+		add 1 to {King.Checks.HeuristicsFailRate.FalseHit.%player%}
+	else:
+		add 1 to {King.Checks.HeuristicsFailRate.TrueHit.%player%}
+	clear {King.Checks.HeuristicsFailRate.%player%}
+	
+every 360 seconds:
+	loop all players:
+		resetVL(loop-player-1)
+
+every 10 seconds:
+	loop all players:
+		if {King.Checks.BadPackets.VLLevel.%loop-player%} >= 30:
+			if {King.Booleans.WhatDoAfterVL} is "Kick":
+				kick the loop-player due to "{@King.Settings.Prefix} &fZostales wyrzucony z serwera : %{King.Floats.Color.Type}%[BadPackets]"
+				resetVL(loop-player-1)
+				if {King.Booleans.Notify.Enabled} is true:
+					broadcast "{@King.Settings.Prefix} %{King.Floats.Color.Type}%%loop-player% &7zostal wyrzucony za %{King.Floats.Color.Type}%[BadPackets]"
+			else if {King.Booleans.WhatDoAfterVL} is "Ban":
+				set {King.Booleans.PlayerWasBanned.%loop-player%} to true
+				kick the loop-player due to "{@King.Settings.Prefix} &fZostales zbanowany na serwerze przez %{King.Floats.Color.Type}%[AntiCheat]"
+				if {King.Booleans.Notify.Enabled} is true:
+					broadcast "{@King.Settings.Prefix} %{King.Floats.Color.Type}%%loop-player% &7zostal zbanowany przez %{King.Floats.Color.Type}%[AntiCheat]"
+			else:
+				resetVL(loop-player-1)
+		if {King.Checks.Actions.VLLevel.%loop-player%} >= 20:
+			if {King.Booleans.WhatDoAfterVL} is "Kick":
+				kick the loop-player due to "{@King.Settings.Prefix} &fZostales wyrzucony z serwera : %{King.Floats.Color.Type}%[Actions]"
+				resetVL(loop-player-1)
+				if {King.Booleans.Notify.Enabled} is true:
+					broadcast "{@King.Settings.Prefix} %{King.Floats.Color.Type}%%loop-player% &7zostal wyrzucony za %{King.Floats.Color.Type}%[Actions]"
+			else if {King.Booleans.WhatDoAfterVL} is "Ban":
+				set {King.Booleans.PlayerWasBanned.%loop-player%} to true
+				kick the loop-player due to "{@King.Settings.Prefix} &fZostales zbanowany na serwerze przez %{King.Floats.Color.Type}%[AntiCheat]"
+				if {King.Booleans.Notify.Enabled} is true:
+					broadcast "{@King.Settings.Prefix} %{King.Floats.Color.Type}%%loop-player% &7zostal zbanowany przez %{King.Floats.Color.Type}%[AntiCheat]"
+			else:
+				resetVL(loop-player-1)
+		if {King.Checks.NoFall.VLLevel.%loop-player%} >= 20:
+			if {King.Booleans.WhatDoAfterVL} is "Kick":
+				kick the loop-player due to "{@King.Settings.Prefix} &fZostales wyrzucony z serwera : %{King.Floats.Color.Type}%[NoFall]"
+				resetVL(loop-player-1)
+				if {King.Booleans.Notify.Enabled} is true:
+					broadcast "{@King.Settings.Prefix} %{King.Floats.Color.Type}%%loop-player% &7zostal wyrzucony za %{King.Floats.Color.Type}%[NoFall]"
+			else if {King.Booleans.WhatDoAfterVL} is "Ban":
+				set {King.Booleans.PlayerWasBanned.%loop-player%} to true
+				kick the loop-player due to "{@King.Settings.Prefix} &fZostales zbanowany na serwerze przez %{King.Floats.Color.Type}%[AntiCheat]"
+				if {King.Booleans.Notify.Enabled} is true:
+					broadcast "{@King.Settings.Prefix} %{King.Floats.Color.Type}%%loop-player% &7zostal zbanowany przez %{King.Floats.Color.Type}%[AntiCheat]"
+			else:
+				resetVL(loop-player-1)
+		if {King.Checks.Speed.VLLevel.%loop-player%} >= 30:
+			if {King.Booleans.WhatDoAfterVL} is "Kick":
+				kick the loop-player due to "{@King.Settings.Prefix} &fZostales wyrzucony z serwera : %{King.Floats.Color.Type}%[Speed]"
+				resetVL(loop-player-1)
+				if {King.Booleans.Notify.Enabled} is true:
+					broadcast "{@King.Settings.Prefix} %{King.Floats.Color.Type}%%loop-player% &7zostal wyrzucony za %{King.Floats.Color.Type}%[Speed]"
+			else if {King.Booleans.WhatDoAfterVL} is "Ban":
+				set {King.Booleans.PlayerWasBanned.%loop-player%} to true
+				kick the loop-player due to "{@King.Settings.Prefix} &fZostales zbanowany na serwerze przez %{King.Floats.Color.Type}%[AntiCheat]"
+				if {King.Booleans.Notify.Enabled} is true:
+					broadcast "{@King.Settings.Prefix} %{King.Floats.Color.Type}%%loop-player% &7zostal zbanowany przez %{King.Floats.Color.Type}%[AntiCheat]"
+			else:
+				resetVL(loop-player-1)
+		if {King.Checks.AutoClicker.VLLevel.%loop-player%} >= 6:
+			if {King.Booleans.WhatDoAfterVL} is "Kick":
+				kick the loop-player due to "{@King.Settings.Prefix} &fZostales wyrzucony z serwera : %{King.Floats.Color.Type}%[AutoClicker]"
+				resetVL(loop-player-1)
+				if {King.Booleans.Notify.Enabled} is true:
+					broadcast "{@King.Settings.Prefix} %{King.Floats.Color.Type}%%loop-player% &7zostal wyrzucony za %{King.Floats.Color.Type}%[AutoClicker]"
+			else if {King.Booleans.WhatDoAfterVL} is "Ban":
+				set {King.Booleans.PlayerWasBanned.%loop-player%} to true
+				kick the loop-player due to "{@King.Settings.Prefix} &fZostales zbanowany na serwerze przez %{King.Floats.Color.Type}%[AntiCheat]"
+				if {King.Booleans.Notify.Enabled} is true:
+					broadcast "{@King.Settings.Prefix} %{King.Floats.Color.Type}%%loop-player% &7zostal zbanowany przez %{King.Floats.Color.Type}%[AntiCheat]"
+			else:
+				resetVL(loop-player-1)
+		if {King.Checks.Fly.VLLevel.%loop-player%} >= 30:
+			if {King.Booleans.WhatDoAfterVL} is "Kick":
+				kick the loop-player due to "{@King.Settings.Prefix} &fZostales wyrzucony z serwera : %{King.Floats.Color.Type}%[Fly]"
+				resetVL(loop-player-1)
+				if {King.Booleans.Notify.Enabled} is true:
+					broadcast "{@King.Settings.Prefix} %{King.Floats.Color.Type}%%loop-player% &7zostal wyrzucony za %{King.Floats.Color.Type}%[Fly]"
+			else if {King.Booleans.WhatDoAfterVL} is "Ban":
+				set {King.Booleans.PlayerWasBanned.%loop-player%} to true
+				kick the loop-player due to "{@King.Settings.Prefix} &fZostales zbanowany na serwerze przez %{King.Floats.Color.Type}%[AntiCheat]"
+				if {King.Booleans.Notify.Enabled} is true:
+					broadcast "{@King.Settings.Prefix} %{King.Floats.Color.Type}%%loop-player% &7zostal zbanowany przez %{King.Floats.Color.Type}%[AntiCheat]"
+			else:
+				resetVL(loop-player-1)
+		if {King.Checks.KillAura.VLLevel.%loop-player%} >= 12:
+			if {King.Booleans.WhatDoAfterVL} is "Kick":
+				kick the loop-player due to "{@King.Settings.Prefix} &fZostales wyrzucony z serwera : %{King.Floats.Color.Type}%[KillAura / AimBot / TriggerBot]"
+				resetVL(loop-player-1)
+				if {King.Booleans.Notify.Enabled} is true:
+					broadcast "{@King.Settings.Prefix} %{King.Floats.Color.Type}%%loop-player% &7zostal wyrzucony za %{King.Floats.Color.Type}%[KillAura / AimBot / TriggerBot]"
+			else if {King.Booleans.WhatDoAfterVL} is "Ban":
+				set {King.Booleans.PlayerWasBanned.%loop-player%} to true
+				kick the loop-player due to "{@King.Settings.Prefix} &fZostales zbanowany na serwerze przez %{King.Floats.Color.Type}%[AntiCheat]"
+				if {King.Booleans.Notify.Enabled} is true:
+					broadcast "{@King.Settings.Prefix} %{King.Floats.Color.Type}%%loop-player% &7zostal zbanowany przez %{King.Floats.Color.Type}%[AntiCheat]"
+			else:
+				resetVL(loop-player-1)
+			
+		set {King.Checks.KillAura.Confidece1.%loop-player%} to ({King.Integers.LeftClicks.%loop-player%} * (5 - {King.Checks.HeuristicsFailRate.FalseHit.%loop-player%}))
+		if {King.Checks.KillAura.Confidece1.%loop-player%} >= 100:
+			set {King.Checks.KillAura.Confidece1.%loop-player%} to 100
+			
+		set {King.Checks.KillAura.Confidece2.%loop-player%} to (9 * (0 + {King.Checks.KillAuraHeusterics-Pitch.%loop-player%}))
+		if {King.Checks.KillAura.Confidece2.%loop-player%} >= 100:
+			set {King.Checks.KillAura.Confidece2.%loop-player%} to 100
+			
+		set {King.Checks.KillAura.Confidece3.%loop-player%} to (9 * (0 + {King.Checks.KillAuraHeusterics-Yaw.%loop-player%}))
+		if {King.Checks.KillAura.Confidece3.%loop-player%} >= 100:
+			set {King.Checks.KillAura.Confidece3.%loop-player%} to 100
+		
+		#Heuristics confidence | min. 36% | no fp - 85% | most accurate - 70%
+		if {King.Checks.KillAura.Confidece1.%loop-player%} >= {@King.Settings.MinConfidence}:
+			if {King.Integers.LeftClicks.%loop-player%} >= 15:
+				if ({King.Checks.HeuristicsFailRate.FalseHit.%loop-player%} + 1) <= 4:
+					add 1 to {King.Checks.KillAura.VLLevel.%loop-player%}
+					if {King.Booleans.Notify.Enabled} is true:
+						send "{@King.Settings.Prefix} &7%loop-player% &fposiada %{King.Floats.Color.Type}%KillAura&f(vl&f.%{King.Checks.KillAura.VLLevel.%loop-player%}%) &f: Analiza heurystyczna jest pewna na %{King.Checks.KillAura.Confidece1.%loop-player%}%％ &c[ %{King.Integers.LeftClicks.%loop-player%}%, %{King.Checks.HeuristicsFailRate.FalseHit.%loop-player%} + 1%->%{King.Checks.HeuristicsFailRate.TrueHit.%loop-player%}% ]" to all ops
+		if {King.Checks.KillAuraVanilla.%loop-player%} >= 4:
+			add 1 to {King.Checks.KillAura.VLLevel.%loop-player%}
+			if {King.Booleans.Notify.Enabled} is true:
+				send "{@King.Settings.Prefix} &7%loop-player% &fposiada %{King.Floats.Color.Type}%KillAura&f(vl&f.%{King.Checks.KillAura.VLLevel.%loop-player%}%) &f: Analiza wzoru uderzen wykryla %{King.Checks.KillAuraVanilla.%loop-player%}% podejrzanych zachowan &c[ Pattern(%{patterns2.%loop-player%}%, %{patterns.%loop-player%}%) ]" to all ops	
+			set {King.Checks.KillAuraVanilla.%loop-player%} to 0
+		if {King.Checks.KillAura.Confidece2.%loop-player%} >= {@King.Settings.MinConfidence}:
+			if {King.Checks.KillAuraHeusterics-Pitch.%loop-player%} > 5: #Heuristics % 5 - 50% (recommended) accurate // 7 - 70% (defeault) 9 - 90% (no false positives) for yaw rots ~undi
+				add 1 to {King.Checks.KillAura.VLLevel.%loop-player%}
+				if {King.Booleans.Notify.Enabled} is true:
+					send "{@King.Settings.Prefix} &7%loop-player% &fposiada %{King.Floats.Color.Type}%KillAura&f(vl&f.%{King.Checks.KillAura.VLLevel.%loop-player%}%) &f: Analiza heurystyczna jest pewna na %{King.Checks.KillAura.Confidece2.%loop-player%}%％ &c[ %{King.Checks.KillAuraHeusterics-Pitch.%loop-player%}%/5 ]" to all ops
+		if {King.Checks.KillAura.Confidece3.%loop-player%} >= {@King.Settings.MinConfidence}:
+			if {King.Checks.KillAuraHeusterics-Yaw.%loop-player%} > 6: #for pitch rots
+				add 1 to {King.Checks.KillAura.VLLevel.%loop-player%}
+				if {King.Booleans.Notify.Enabled} is true:
+					send "{@King.Settings.Prefix} &7%loop-player% &fposiada %{King.Floats.Color.Type}%KillAura&f(vl&f.%{King.Checks.KillAura.VLLevel.%loop-player%}%) &f: Analiza heurystyczna jest pewna na %{King.Checks.KillAura.Confidece3.%loop-player%}%％ &c[ %{King.Checks.KillAuraHeusterics-Yaw.%loop-player%}%/6 ]" to all ops	
+		clear {King.Checks.HeuristicsFailRate.TrueHit.%loop-player%}
+		clear {King.Checks.HeuristicsFailRate.FalseHit.%loop-player%}
+		clear {King.Integers.LeftClicks.%loop-player%}
+		delete {King.Checks.KillAuraHeusterics-Pitch.%loop-player%}
+		delete {King.Checks.KillAuraHeusterics-Yaw.%loop-player%}
+		set {King.Checks.KillAuraVanilla.%loop-player%} to 0
+			
+every 1 seconds:
+	loop all players:
+		if {King.Checks.BadPackets.C05PacketPlayer.%loop-player%} >= {@King.Settings.MaxPackets}:
+			add 1 to {King.Checks.BadPackets.VLLevel.%loop-player%}
+			send "{@King.Settings.Prefix} &7%loop-player% &fposiada %{King.Floats.Color.Type}%BadPackets&f(vl&f.%{King.Checks.BadPackets.VLLevel.%loop-player%}%) &f: Gracz wyslal %{King.Checks.BadPackets.C05PacketPlayer.%loop-player%}% pakietow w 20 tickow." to all ops
+			if {King.Booleans.GhostMode.Enabled} is not true:
+				set {King.Booleans.BlockMovement.%loop-player%} to true
+		if {King.Checks.KillAuraVanilla-L.%loop-player%} >= 20:
+			if {King.Checks.KillAuraVanilla-H.%loop-player%} >= 10:
+				add 1 to {King.Checks.KillAuraVanilla.%loop-player%}
+		else:
+			set {King.Checks.KillAuraVanilla.%loop-player%} to 0
+		if {King.Checks.AutoClicker.%loop-player%} >= 12:
+			add 1 to {King.Checks.AutoClicker.VLLevel.%loop-player%}
+			if {King.Booleans.Notify.Enabled} is true:
+				send "{@King.Settings.Prefix} &7%loop-player% &fposiada %{King.Floats.Color.Type}%AutoClicker&f(vl&f.%{King.Checks.AutoClicker.VLLevel.%loop-player%}%) &f: Gracz klika szybciej niz dopuszczalne 12 CPS &c[ %{King.Checks.AutoClicker.%loop-player%}%/12 ]" to all ops
+			clear {King.Checks.AutoClicker.%loop-player%}
+		set {TimerFlag.%loop-player%} to location of loop-player
+		set {King.Checks.KillAuraVanilla.L.%loop-player%} to 0
+		set {King.Checks.KillAuraVanilla-H.%loop-player%} to 0
+		set {King.Checks.Speed.Timer.%loop-player%} to 0
+		set {King.Booleans.BlockFlag.%loop-player%} to false
+		clear {King.Checks.Speed.FastWeb.%loop-player%}
+		clear {King.Checks.AutoClicker.%loop-player%}
+		clear {King.Checks.Actions.%loop-player%}
+		clear {King.Checks.Actions.RC.%loop-player%}
+		clear {King.Checks.Actions.Interacts-D2.%loop-player%}
+		clear {King.Checks.BadPackets.C05PacketPlayer.%loop-player%}
+		
+every 1 tick:
+	loop all players:
+		if {couner.%loop-player%} = 1:
+			add 1 to {cf.%loop-player%}
+		else:
+			set {cf.%loop-player%} to 0
+		
+on damage:
+	if victim's gamemode is survival or adventure:
+		if victim is player:
+			set {King.Checks.Speed.Multiplier.%victim%} to 0.11
+			set {King.Booleans.FaslePositives.%victim%} to true
+			wait 1 seconds
+			set {King.Checks.Speed.Multiplier.%victim%} to 0
+			set {King.Booleans.FaslePositives.%victim%} to false
+on damage:
+	if attacker is player:
+		if victim is not burning:
+			{King.Checks.KillAura.Enabled} is true
+			if attacker's gamemode is survival or adventure:
+				set {attacker.%attacker%} to attacker's pitch
+				set {attacker2.%attacker%} to attacker's yaw
+				wait 1 tick
+				if difference between {attacker.%attacker%} and attacker's pitch is 0:
+					add 1 to {King.Checks.KillAuraHeusterics-Pitch.%attacker%}
+				if difference between {attacker2.%attacker%} and attacker's yaw is 0:
+					add 1 to {King.Checks.KillAuraHeusterics-Yaw.%attacker%}
+				
+every 2 seconds:
+	loop all players:
+		set {p.%loop-player%} to loop-player's pitch
+		set {p2.%loop-player%} to loop-player's yaw
+		wait 2 seconds
+		if difference between {p.%loop-player%} and loop-player's pitch is 0:
+			delete {King.Checks.KillAuraHeusterics-Pitch.%loop-player%}
+		if difference between {p2.%loop-player%} and loop-player's yaw is 0:
+			delete {King.Checks.KillAuraHeusterics-Yaw.%loop-player%}
+		set {King.Checks.Actions.Interacts-D.%loop-player%} to 0
+		clear {King.Checks.KillAura.NaturalValues.%loop-player%}
+		
+			
+on packet:
+	player's gamemode is survival or adventure
+	if event-string is "PacketPlayInPositionLook" or "PacketPlayInLook":
+		{King.Checks.KillAura.Enabled} is true
+		{@King.Settings.KAPackets} is true
+		if {King.Booleans.TP-FP.%player%} is false:
+			add 1 to {King.Checks.KillAuraVanilla-L.%player%}
+			if difference between {King.Packetlook.%player%} and now < 0.06 second:
+				set {_pitch.%player%} to player's pitch 
+				if {_pitch.%player%} != 90 or -90:
+					set {_rotations.%player%} to round {_pitch.%player%}
+					if {_pitch.%player%} = {_rotations.%player%}:
+						add 1 to {King.Checks.KillAura.VLLevel.%player%}
+						if {King.Booleans.Notify.Enabled} is true:
+							send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%KillAura&f(vl&f.%{King.Checks.KillAura.VLLevel.%player%}%) &f: Gracz wysyla pakiety zbyt szybko" to all ops
+			set {King.Packetlook.%player%} to now
+	if event-string is "PacketPlayInUseEntity":
+		{King.Checks.KillAura.Enabled} is true
+		{@King.Settings.KAPackets} is true
+		set {_p} to player's pitch
+		set {_y} to player's yaw
+		wait 1 tick
+		set {_p2} to player's pitch
+		set {_y2} to player's yaw
+		if {_p} - {_p2} = 1 or -1:
+			add 1 to {King.Checks.KillAura.AnalyticsRot2.%player%}
+			if {King.Checks.KillAura.AnalyticsRot2.%player%} >= 2:
+				add 1 to {King.Checks.KillAura.VLLevel.%player%}
+				if {King.Booleans.Notify.Enabled} is true:
+					send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%KillAura&f(vl&f.%{King.Checks.KillAura.VLLevel.%player%}%) &f: Roznice w rotacjach sa takie same" to all ops
+				set {King.Checks.KillAura.AnalyticsRot2.%player%} to 0
+		if {_y} - {_y2} = 1 or -1:
+			add 1 to {King.Checks.KillAura.AnalyticsRot.%player%}
+			if {King.Checks.KillAura.AnalyticsRot.%player%} >= 2:
+				add 1 to {King.Checks.KillAura.VLLevel.%player%}
+				if {King.Booleans.Notify.Enabled} is true:
+					send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%KillAura&f(vl&f.%{King.Checks.KillAura.VLLevel.%player%}%) &f: Roznice w rotacjach sa takie same" to all ops
+				set {King.Checks.KillAura.AnalyticsRot.%player%} to 0
+			set {King.Checks.KillAura.RotationsSpeed2.%player%} to now
+	if event-string is "PacketPlayInBlockDig":
+		{King.Checks.KillAura.Enabled} is true
+		set {King.Checks.AutoClicker.%player%} to 0
+	if event-string is "PacketPlayInEntityAction":
+		{King.Checks.Actions.Enabled} is true
+		add 1 to {King.Checks.Actions.%player%}
+		if {King.Checks.Actions.%player%} >= 25:
+			add 1 to {King.Checks.Actions.VLLevel.%player%}
+			if {King.Booleans.Notify.Enabled} is true:
+				send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%Actions&f(vl&f.%{King.Checks.Actions.VLLevel.%player%}%) &f: Gracz wykonuje niemozliwe akcje / interakcje (Pakiety)" to all ops
+			clear {King.Checks.Actions.%player%}
+	if event-string is "PacketPlayInHeldItemSlot":
+		{King.Checks.Actions.Enabled} is true
+		if difference between {King.Checks.Actions.PlaceAir.%player%} and now is 0 seconds:
+			add 1 to {King.Checks.Actions.VLLevel.%player%}
+			if {King.Booleans.Notify.Enabled} is true:
+				send "&9&l⌈ &dKing&r&5™ &c&l⌋ &f&l• &7%player% &fposiada &dActions&f(vl&f.%{King.Checks.Actions.VLLevel.%player%}%) &f: Gracz prawdopodobnie uzywa cheatu : Scaffold[2]" to all ops
+			set {King.Booleans.FlagBlock.%player%} to true
+		set {King.Checks.Actions.PlaceAir.%player%} to now
+	if event-string is "PacketPlayInAbilities":
+		if player's gamemode is survival or adventure:
+			if player is op:
+				stop
+			else:
+				add 1 to {King.Checks.Actions.VLLevel.%player%}
+				send "&9&l⌈ &dKing&r&5™ &c&l⌋ &f&l• &7%player% &fposiada &dActions&f(vl&f.%{King.Checks.Actions.VLLevel.%player%}%) &f: PacketPlayInAbilities" to all ops
+	if event-string is "PacketPlayInBlockPlace":
+		add 1 to {couner.%player%}
+	if event-string is "PacketPlayInPosition":
+		{King.Checks.BadPackets.Enabled} is true
+		add 1 to {King.Checks.BadPackets.C05PacketPlayer.%player%}
+	if event-string is "PacketPlayInChat":
+		{King.Checks.BadPackets.Enabled} is true
+		if difference between {King.Checks.BadPackets.C17PacketEntity.%player%} and now is smaller than {@King.Settings.NextMessageTime}:
+			add 1 to {King.Checks.BadPackets.VLLevel.%player%}
+			if {King.Booleans.Notify.Enabled} is true:
+				send "{@King.Settings.Prefix} &7Nie pisz tak szybko!" to player
+				send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%BadPackets&f(vl&f.%{King.Checks.BadPackets.VLLevel.%player%}%) &f: Gracz wysyla wiadomosci zbyt szybko (Spammer?)" to all ops
+		set {King.Checks.BadPackets.C17PacketEntity.%player%} to now
+	
+on consume:
+	{King.Checks.Actions.Enabled} is true
+	if player is sprinting:
+		add 1 to {King.Checks.Actions.VLLevel.%player%}
+		if {King.Booleans.Notify.Enabled} is true:
+			send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%Actions&f(vl&f.%{King.Checks.Actions.VLLevel.%player%}%) &f: Gracz wykonuje niemozliwe akcje / interakcje (Jedzenie)" to all ops
+		cancel event
+		
+on inventory open:
+	{King.Checks.Actions.Enabled} is true
+	if player is sprinting:
+		add 1 to {King.Checks.Actions.VLLevel.%player%}
+		if {King.Booleans.Notify.Enabled} is true:
+			send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%Actions&f(vl&f.%{King.Checks.Actions.VLLevel.%player%}%) &f: Gracz wykonuje niemozliwe akcje / interakcje (Ekwipunek)" to all ops
+	if player is sneaking:
+		add 1 to {King.Checks.Actions.VLLevel.%player%}
+		if {King.Booleans.Notify.Enabled} is true:
+			send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%Actions&f(vl&f.%{King.Checks.Actions.VLLevel.%player%}%) &f: Gracz wykonuje niemozliwe akcje / interakcje (Ekwipunek)" to all ops
+		
+on inventory click:
+	{King.Checks.Actions.Enabled} is true
+	if player is sprinting:
+		add 1 to {King.Checks.Actions.VLLevel.%player%}
+		if {King.Booleans.Notify.Enabled} is true:
+			send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%Actions&f(vl&f.%{King.Checks.Actions.VLLevel.%player%}%) &f: Gracz wykonuje niemozliwe akcje / interakcje (Ekwipunek)" to all ops
+		cancel event
+	if player is sneaking:
+		add 1 to {King.Checks.Actions.VLLevel.%player%}
+		if {King.Booleans.Notify.Enabled} is true:
+			send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%Actions&f(vl&f.%{King.Checks.Actions.VLLevel.%player%}%) &f: Gracz wykonuje niemozliwe akcje / interakcje (Ekwipunek)" to all ops
+		cancel event
+		
+on place:
+	if player's gamemode is survival or adventure:
+		{King.Checks.Actions.Enabled} is true
+		set {couner.%player%} to 0
+		if {cf.%player%} = 1:
+			add 1 to {King.Integers.ActionsLag.%player%}
+			if {King.Integers.ActionsLag.%player%} >= 1:
+				if block under target block is air:
+					set {King.Booleans.BlockFlag.%player%} to true
+					add 1 to {King.Checks.Actions.VLLevel.%player%}
+					if {King.Booleans.Notify.Enabled} is true:
+						send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%Actions&f(vl&f.%{King.Checks.Actions.VLLevel.%player%}%) &f: Gracz prawdopodobnie uzywa cheatu : Scaffold[1]" to all ops
+					set {cf.%player%} to 0
+					set {King.Integers.ActionsLag.%player%} to 0
+		else:
+			set {King.Integers.ActionsLag.%player%} to 0
+		if {King.Booleans.BlockFlag.%player%} is true:
+			if {King.Booleans.GhostMode.Enabled} is not true:
+				cancel event
+				teleport player to {Flag.%player%}
+			set {King.Booleans.BlockFlag.%player%} to false
+		if difference between {King.Checks.FastPlace.%player%} and now is smaller than {@King.Settings.PlaceTime}:
+			if {King.Booleans.GhostMode.Enabled} is not true:
+				cancel event
+				teleport player to {Flag.%player%}
+			add 1 to {King.Checks.Actions.VLLevel.%player%}
+			send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%FastPlace&f(vl&f.%{King.Checks.Actions.VLLevel.%player%}%) &f: Gracz kladzie bloki zbyt szybko" to all ops
+		if {DistanceToBlock.%player%} > {@King.Settings.MaxInteractDistance}:
+			if {King.Booleans.GhostMode.Enabled} is not true:
+				cancel event
+				teleport player to {Flag.%player%}
+			add 1 to {King.Checks.Actions.VLLevel.%player%}
+			if {King.Booleans.Notify.Enabled} is true:
+				send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%Actions&f(vl&f.%{King.Checks.Actions.VLLevel.%player%}%) &f: Gracz probuje polozyc %event-block% %abs({@King.Settings.MaxInteractDistance} - {DistanceToBlock.%player%})% za daleko" to all ops
+		set {Flag.%player%} to player's location
+			
+		#
+		# atan2(1, 2) || atan(1 / 2) || abs(double) || sqrt(*)
+		#
+		
+		set {Location-TargetBlock.%player%} to location of target block
+			
+		set {x-Player.%player%} to x location of player
+		set {x-TargetBlock.%player%} to x location of event-block
+			
+		set {z-Player.%player%} to z location of player
+		set {z-TargetBlock.%player%} to z location of event-block
+			
+		set {y-Player.%player%} to y location of player
+		set {y-TargetBlock.%player%} to y location of event-block
+			
+		set {xDiff.%player%} to ({x-Player.%player%} - {x-TargetBlock.%player%})
+		set {zDiff.%player%} to ({z-Player.%player%} - {z-TargetBlock.%player%})
+		set {yDiff.%player%} to {y-TargetBlock.%player%} - 1.6 + 0.5 - {y-Player.%player%}
+		
+		set {DistanceToBlock.%player%} to sqrt((({xDiff.%player%} * {xDiff.%player%}) + ({zDiff.%player%} * {zDiff.%player%})))
+		set {NeddedPitch.%player%} to abs(atan({yDiff.%player%} / {DistanceToBlock.%player%}))
+		if {@King.Settings.Interacts} is true:
+			if block under event-block is air:
+				if {yDiff.%player%} = -1.6:
+					if abs(player's pitch - {NeddedPitch.%player%}) >= 23.5 - ({@King.Settings.Interacts-Tolerance} / 10):
+						if {King.Booleans.GhostMode.Enabled} is not true:
+							cancel event
+							teleport player to {Flag.%player%}
+						add 1 to {King.Checks.Actions.VLLevel.%player%}
+						if {King.Booleans.Notify.Enabled} is true:
+							send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%Actions&f(vl&f.%{King.Checks.Actions.VLLevel.%player%}%) &f: Nieprawidlowy kat do bloku %event-block% &c[%abs(player's pitch - {NeddedPitch.%player%})%/ %{NeddedPitch.%player%}% : %{NeddedPitch.%player%} + 23.5%]" to all ops
+					if abs(player's pitch - {NeddedPitch.%player%}) <= -17.95 - ({@King.Settings.Interacts-Tolerance} / 10):
+						if {King.Booleans.GhostMode.Enabled} is not true:
+							cancel event
+							teleport player to {Flag.%player%}
+						add 1 to {King.Checks.Actions.VLLevel.%player%}
+						if {King.Booleans.Notify.Enabled} is true:
+							send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%Actions&f(vl&f.%{King.Checks.Actions.VLLevel.%player%}%) &f: Nieprawidlowy kat do bloku %event-block% &c[%abs(player's pitch - {NeddedPitch.%player%})%/ %{NeddedPitch.%player%}% : %{NeddedPitch.%player%} - 17.95%]" to all ops
+		if {Location-TargetBlock.%player%} is not location of event-block:
+			if block under event-block is air:
+				add 1 to {King.Integers.Int3.%player%}
+				if {King.Integers.Int3.%player%} >= 2:
+					set {King.Integers.Int3.%player%} to 0
+					if {King.Booleans.GhostMode.Enabled} is not true:
+						cancel event
+						teleport player to {Flag.%player%}
+					add 1 to {King.Checks.Actions.VLLevel.%player%}
+					if {King.Booleans.Notify.Enabled} is true:
+						send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%Actions&f(vl&f.%{King.Checks.Actions.VLLevel.%player%}%) &f: Gracz probuje polozyc blok nie patrzac na niego." to all ops
+		else:
+			set {King.Integers.Int3.%player%} to 0
+		set {King.Checks.FastPlace.%player%} to now
+
+on break:
+	if player's gamemode is survival or adventure:
+		{King.Checks.Actions.Enabled} is true
+		
+		set {x-Player2.%player%} to x location of player
+		set {x-TargetBlock2.%player%} to x location of event-block
+			
+		set {z-Player2.%player%} to z location of player
+		set {z-TargetBlock2.%player%} to z location of event-block
+		
+		set {xDiff2.%player%} to ({x-Player2.%player%} - {x-TargetBlock2.%player%})
+		set {zDiff2.%player%} to ({z-Player2.%player%} - {z-TargetBlock2.%player%})
+		
+		set {DistanceToBlock2.%player%} to sqrt((({xDiff2.%player%} * {xDiff2.%player%}) + ({zDiff2.%player%} * {zDiff2.%player%})))
+		if {DistanceToBlock2.%player%} > {@King.Settings.MaxInteractDistance}:
+			if event-block is not long grass:
+				if {King.Booleans.GhostMode.Enabled} is not true:
+					cancel event
+					teleport player to {Flag.%player%}
+				add 1 to {King.Checks.Actions.VLLevel.%player%}
+				if {King.Booleans.Notify.Enabled} is true:
+					send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%Actions&f(vl&f.%{King.Checks.Actions.VLLevel.%player%}%) &f: Gracz probuje zniszczyc %event-block% %abs({@King.Settings.MaxInteractDistance} - {DistanceToBlock2.%player%})% za daleko" to all ops
+		
+				
+on any move:
+	set {_start} to location of player
+	wait 0.01 seconds
+	set {_end} to location of player
+	if player's gamemode is survival or adventure:
+		if player is not riding:
+			if player is not flying:
+				if {King.Checks.Fly.Enabled} is true:
+					if y-location of {_start} - y-location of {_end} = -0.41999998688697815:
+						if player is on ground:
+							stop
+						else:
+							if {King.Booleans.isOnGround.%player%} is false:
+								block under player is not fence
+								add 1 to {King.Checks.Fly.AirJumps.%player%}
+								if {King.Checks.Fly.AirJumps.%player%} >= 2:
+									teleport player to {Sapphire.tpUtils.Fly.%player%}
+									add 1 to {King.Checks.Fly.VLLevel.%player%}
+									if {King.Booleans.Notify.Enabled} is true:
+										add 1 to {King.Checks.Fly.VLLevel.%player%}
+										if {King.Booleans.Notify.Enabled} is true:
+											send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%Fly&f(vl&f.%{King.Checks.Fly.VLLevel.%player%}%) &f: Gracz probuje uniesc sie w powietrze skaczac po powietrzu" to all ops
+										if {King.Booleans.GhostMode.Enabled} is not true:
+											teleport player to {l.%player%}
+							else:
+								set {King.Checks.Fly.AirJumps.%player%} to 0
+					if player is on ground:
+						set {King.Booleans.isOnGround.%player%} to true
+						set {l.%player%} to location of player
+					else:
+						set {King.Booleans.isOnGround.%player%} to false
+					if block 1 under player is air:
+						block 1 under west player is air
+						block 1 under east player is air
+						block 1 under south player is air
+						block 1 under north player is air
+						block 1 under north-west player is air
+						block 1 under north-east player is air
+						block 1 under south-east player is air
+						block 1 under south-west player is air
+						set {King.Booleans.isOnGround.%player%} to false
+					else:
+						set {King.Booleans.isOnGround.%player%} to true
+				if block at player is air or snow layer or water or lava or carpet or sugar canes or torch or redstone or redstone torch or lever or slab:
+					if player is on ground:
+						if block 0.5 under player is air:
+							{King.Checks.NoFall.Enabled} is true
+							block under player is not fence
+							block 0.5 under west player is air
+							block 0.5 under east player is air
+							block 0.5 under south player is air
+							block 0.5 under south-west player is air
+							block 0.5 under south-east player is air
+							block 0.5 under north player is air
+							block 0.5 under north-west player is air
+							block 0.5 under north-east player is air
+							add 1 to {King.Checks.NoFall.VLLevel.%player%}
+							if {King.Booleans.GhostMode.Enabled} is not true:
+								teleport player to {Sapphire.tpUtils.Fly.%player%}
+							damage player by abs(y-location of {_start} - y-location of {_end})
+							if {King.Booleans.Notify.Enabled} is true:
+								send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%NoFall&f(vl&f.%{King.Checks.NoFall.VLLevel.%player%}%) &f: Gracz nie probuje zignorowac obrazenia od upadku " to all ops
+						{King.Checks.Fly.Enabled} is true
+						if {King.Checks.Fly.PotencialFP2.%player%} >= 2:
+							if block 0.25 under player is air:
+								if {King.Booleans.GhostMode.Enabled} is not true:
+									teleport player to {King.Locations.SetBack-FlyFloat.%player%}
+								wait 0.01 seconds
+							else:
+								set {King.Checks.Fly.PotencialFP2.%player%} to 0
+						block 0.25 below west player is air or snow layer or water or lava or carpet or sugar canes or torch or redstone or redstone torch or lever
+						block 0.25 below east player is air or snow layer or water or lava or carpet or sugar canes or torch or redstone or redstone torch or lever
+						block 0.25 below south player is air or snow layer or water or lava or carpet or sugar canes or torch or redstone or redstone torch or lever
+						block 0.25 below north player is air or snow layer or water or lava or carpet or sugar canes or torch or redstone or redstone torch or lever
+						block 0.25 below north-west player is air or snow layer or water or lava or carpet or sugar canes or torch or redstone or redstone torch or lever
+						block 0.25 below north-east player is air or snow layer or water or lava or carpet or sugar canes or torch or redstone or redstone torch or lever
+						block 0.25 below south-east player is air or snow layer or water or lava or carpet or sugar canes or torch or redstone or redstone torch or lever
+						block 0.25 below south-west player is air or snow layer or water or lava or carpet or sugar canes or torch or redstone or redstone torch or lever
+						block 0.25 below 0.5 west player is air or snow layer or water or lava or carpet or sugar canes or torch or redstone or redstone torch or lever
+						block 0.25 below 0.5 east player is air or snow layer or water or lava or carpet or sugar canes or torch or redstone or redstone torch or lever
+						block 0.25 below 0.5 south player is air or snow layer or water or lava or carpet or sugar canes or torch or redstone or redstone torch or lever
+						block 0.25 below 0.5 north player is air or snow layer or water or lava or carpet or sugar canes or torch or redstone or redstone torch or lever
+						block 0.25 below 0.5 north-west player is air or snow layer or water or lava or carpet or sugar canes or torch or redstone or redstone torch or lever
+						block 0.25 below 0.5 north-east player is air or snow layer or water or lava or carpet or sugar canes or torch or redstone or redstone torch or lever
+						block 0.25 below 0.5 south-east player is air or snow layer or water or lava or carpet or sugar canes or torch or redstone or redstone torch or lever
+						block 0.25 below 0.5 south-west player is air or snow layer or water or lava or carpet or sugar canes or torch or redstone or redstone torch or lever
+						if y-location of {_start} = y-location of {_end}:
+							{King.Booleans.TP-FP.%player%} is false
+							add 1 to {King.Checks.Fly.PotencialFP2.%player%}
+							if {King.Checks.Fly.PotencialFP2.%player%} >= 2:
+								add 1 to {King.Checks.Fly.VLLevel.%player%}
+								if {King.Booleans.Notify.Enabled} is true:
+									send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%Fly&f(vl&f.%{King.Checks.Fly.VLLevel.%player%}%) &f: Gracz porusza sie podejrzanie &c[ %y-location of {_start} - y-location of {_end}%->%y-location of {_start} - y-location of {_end}% ]" to all ops
+						if y-location of {_start} != y-location of {_end}:
+							set {King.Checks.Fly.PotencialFP2.%player%} to 0
+						if block 0.25 below player is not stair:
+							set {Location.setback.%player%} to location of player
+					else:
+						{King.Checks.Fly.Enabled} is true
+						if y-location of {_start} = y-location of {_end}:
+							{King.Booleans.TP-FP.%player%} is false
+							add 1 to {King.Checks.Fly.PotencialFP.%player%}
+							if {King.Checks.Fly.PotencialFP.%player%} >= 2:
+								add 1 to {King.Checks.Fly.VLLevel.%player%}
+								if {King.Booleans.Notify.Enabled} is true:
+									send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%Fly&f(vl&f.%{King.Checks.Fly.VLLevel.%player%}%) &f: Gracz porusza sie podejrzanie &c[ %y-location of {_start} - y-location of {_end}%->%y-location of {_start} - y-location of {_end}% ]" to all ops
+								set {King.Checks.Fly.PotencialFP.%player%} to 0
+								if block 0.25 below player is air or snow layer or water or lava or carpet or sugar canes or torch or redstone or redstone torch or lever or slab:
+									set {King.Locations.SetBack-FlyFloat.%player%} to location of player
+									set y location of {King.Locations.SetBack-FlyFloat.%player%} to (y location of {King.Locations.SetBack-FlyFloat.%player%} - 0.25)
+									set x location of {King.Locations.SetBack-FlyFloat.%player%} to x location of {_start}
+									set z location of {King.Locations.SetBack-FlyFloat.%player%} to z location of {_start}
+									if {King.Booleans.GhostMode.Enabled} is not true:
+										teleport player to {King.Locations.SetBack-FlyFloat.%player%}
+								else:
+									if {King.Booleans.GhostMode.Enabled} is not true:
+										teleport player to {_start}
+						if y-location of {_start} != y-location of {_end}:
+							set {King.Checks.Fly.PotencialFP.%player%} to 0
+
+on any move:
+	if player's gamemode is survival or adventure:
+		if {King.Booleans.BlockMovement.%player%} is true:
+			add 1 to {King.Integers.Int2.%player%}
+			cancel event
+			if {King.Integers.Int2.%player%} >= 30:
+				set {King.Integers.Int2.%player%} to 0
+				set {King.Booleans.BlockMovement.%player%} to false
+		if player is not riding:
+			if player has swiftness:
+				set {King.Checks.Speed.Multiplier.%player%} to 0.12
+			else:
+				set {King.Checks.Speed.Multiplier.%player%} to 0.0
+			if {King.Checks.Actions.Enabled} is true:
+				if {couner.%player%} = 1:
+					add 1 to {cf.%player%}
+				else:
+					set {cf.%player%} to 0
+			if block 0.1 under player is not air:
+				set {Sapphire.tpUtils.Fly.%player%} to location of player
+			else:
+				set y location of {Sapphire.tpUtils.%player%} to (y location of {Sapphire.tpUtils.%player%} - 0.1)
+			if block below player is not air:
+				{King.Checks.Speed.Enabled} is true
+				set {King.tpUtils.Speed.%player%} to location of player
+			if block at player is cobweb:
+				{King.Checks.Speed.Enabled} is true
+				add 1 to {King.Checks.Speed.FastWeb.%player%}
+				if {King.Checks.Speed.FastWeb.%player%} >= 15:
+					if {King.Booleans.GhostMode.Enabled} is not true:
+						teleport player to {King.tpUtils.Speed.%player%}
+					add 1 to {King.Checks.Speed.VLLevel.%player%}
+					if {King.Booleans.Notify.Enabled} is true:
+						send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%Speed&f(vl&f.%{King.Checks.Speed.VLLevel.%player%}%) &f: Gracz porusza zbyt szybko / nieproporcjonalnie to wzoru (FastWeb) &c[ %{King.Checks.Speed.FastWeb.%player%}%/15 ]" to all ops
+			if block 1.5 under player is soulsand:
+				{King.Checks.Speed.Enabled} is true
+				add 1 to {soulsand.%player%}
+				if {soulsand.%player%} >= 12:
+					set {King.Checks.Speed.%player%} to 0.28
+					set {King.Checks.Speed.GroundType.%player%} to "Piasek Dusz"
+			else:
+				{King.Checks.Speed.Enabled} is true
+				if block 1.5 below player is ice or packed ice:
+					set {normal.%player%} to 0
+					set {King.Checks.Speed.%player%} to 0.46
+					set {King.Checks.Speed.GroundType.%player%} to "Lod"
+				else:
+					if player is on ground:
+						stop
+					else:
+						{King.Checks.Speed.Enabled} is true
+						add 1 to {normal.%player%}
+						set {soulsand.%player%} to 0
+						if {normal.%player%} >= 16:
+							set {King.Checks.Speed.%player%} to {@King.Settings.MaxSpeed}
+							set {King.Checks.Speed.GroundType.%player%} to "Normalny Teren"
+			if block 0.25 under player is air or snow layer or carpet or torch or redstone torch or lever or sugar canes: #0.25 / 0.5 - 3/4, 0.1 -5/6
+				if player is sneaking:
+					if {normal.%player%} >= 15:
+						add 1 to {sneaking.%player%}
+						if {sneaking.%player%} >= 10:
+							if {King.Booleans.FaslePositives.%player%} is true:
+								set {King.Checks.Speed.%player%} to 0.45
+							else:
+								set {King.Checks.Speed.%player%} to 0.10
+				else:
+					set {sneaking.%player%} to 0
+				set {King.Checks.Speed.Loc1.%player%} to location of player
+				set {King.Checks.Speed.LocY.%player%} to y location of player
+				wait 1 ticks
+				set {King.Checks.Speed.Loc2.%player%} to location of player
+				set {King.Checks.Speed.LocY2.%player%} to y location of player
+				set {Math1.%player%} to distance between {King.Checks.Speed.Loc1.%player%} and {King.Checks.Speed.Loc2.%player%}
+				set {Math2.%player%} to {King.Checks.Speed.LocY.%player%} - {King.Checks.Speed.LocY2.%player%}
+				if {Math2.%player%} > 0:
+					set {Math3.%player%} to {Math1.%player%} - {Math2.%player%}
+				else if {Math2.%player%} < 0:
+					set {Math3.%player%} to {Math1.%player%} + {Math2.%player%}
+				else:
+					set {Math3.%player%} to {Math1.%player%}
+				if {Math3.%player%} > {King.Checks.Speed.%player%} + {King.Checks.Speed.Multiplier.%player%}:
+					{King.Checks.Speed.Enabled} is true
+					if block 0.10 under player is air or snow layer or water or lava or carpet or sugar canes or torch or redstone or redstone torch or lever:
+						set y location of {King.tpUtils.Speed.%player%} to (y location of {King.tpUtils.Speed.%player%} - 0.10)
+					add 1 to {King.Integers.FalsePositives-Speed.%player%}
+					if {King.Integers.FalsePositives-Speed.%player%} >= 2:
+						if {King.Booleans.GhostMode.Enabled} is not true:
+							teleport player to {King.tpUtils.Speed.%player%}
+						add 1 to {King.Checks.Speed.VLLevel.%player%}
+						if {King.Booleans.Notify.Enabled} is true:
+							send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%Speed&f(vl&f.%{King.Checks.Speed.VLLevel.%player%}%) &f: Gracz porusza zbyt szybko / nieproporcjonalnie to wzoru (%{King.Checks.Speed.GroundType.%player%}%) &c[ %{Math1.%player%}%-/ %{Math2.%player%}%->%{Math3.%player%}%/%{King.Checks.Speed.%player%} + {King.Checks.Speed.Multiplier.%player%}%]" to all ops
+						set {King.Integers.FalsePositives-Speed.%player%} to 0
+				else:
+					set {King.Integers.FalsePositives-Speed.%player%} to 0
+				if {King.Booleans.FaslePositives.%player%} is not true:
+					if {King.Checks.Fly.Enabled} is true:
+						if player has jump boost:
+							stop
+						else:
+							if {Math2.%player%} < 0:
+								{Math2.%player%} != -0.50000000000000000
+								{Math2.%player%} != -0.4453744695041024
+								{Math2.%player%} != -0.41999998688697815
+								{Math2.%player%} != -0.40444491418477924
+								{Math2.%player%} != -0.33319999363422426
+								{Math2.%player%} != -0.24813599859093927
+								{Math2.%player%} != -0.1647732818260721
+								{Math2.%player%} != -0.08307781780646906
+								{Math2.%player%} != -0.20000004768371582
+								if {Math2.%player%} != -0.033890786745502055:
+									block 1 below player is not ladder or vines or stairs or slab
+									block 0.1 above player is not ladder or vines
+									block 0.1 in front of player is not ladder or vines
+									block north player is not rug or chest or ender chest or slab or snow
+									block south player is not rug or chest or ender chest or slab or snow
+									block west player is not rug or chest or ender chest or slab or snow
+									block east player is not rug or chest or ender chest or slab or snow
+									block north-west player is not rug or chest or ender chest or slab or snow
+									block north-east player is not rug or chest or ender chest or slab or snow
+									block south-west player is not rug or chest or ender chest or slab or snow
+									block south-east player is not rug or chest or ender chest or slab or snow
+									block 1 below player is not stationary water or stationary lava
+									block 0.01 above player is not stationary water or stationary lava
+									block 0.01 below player is not stationary water or stationary lava
+									add 1 to {King.Integers.PotencialLag.%player%}
+									if {King.Integers.PotencialLag.%player%} >= 2:
+										if {King.Booleans.GhostMode.Enabled} is not true:
+											teleport player to {Sapphire.tpUtils.Fly.%player%}
+										add 1 to {King.Checks.Fly.VLLevel.%player%}
+										set {King.Integers.PotencialLag.%player%} to 0
+										if {King.Booleans.Notify.Enabled} is true:
+											send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%Fly&f(vl&f.%{King.Checks.Fly.VLLevel.%player%}%) &f: Gracz probuje uniesc sie w powietrze &c[ %{King.Checks.Speed.LocY.%player%}%-/ %{King.Checks.Speed.LocY2.%player%}%->%abs({Math2.%player%})% : VM]" to all ops
+											stop
+								else:
+									set {King.Integers.PotencialLag.%player%} to 0
+			else if block 0.25 under player is stationary water or stationary lava:
+				if block 0.01 above player is stationary water or stationary lava:
+					{King.Checks.Speed.Enabled} is true
+					block west player is stationary water or stationary lava
+					block east player is stationary water or stationary lava
+					block south player is stationary water or stationary lava
+					block north player is stationary water or stationary lava
+					block north-west player is stationary water or stationary lava
+					block north-east player is stationary water or stationary lava
+					block south-west player is stationary water or stationary lava
+					block south-east player is stationary water or stationary lava
+					set {King.Checks.Speed.GroundType.%player%} to "Woda / Lava"
+					if player is sneaking:
+						add 1 to {sneaking2.%player%}
+						if {sneaking2.%player%} >= 7:
+							set {King.Checks.SpeedWater.%player%} to 0.12
+					else:
+						set {sneaking2.%player%} to 0
+						set {King.Checks.SpeedWater.%player%} to 0.27
+					set {King.Checks.Speed.WaterSpeed1.%player%} to location of player
+					set {King.Checks.Speed.WaterSpeedY1.%player%} to y location of player
+					wait 1 ticks
+					set {King.Checks.Speed.WaterSpeed2.%player%} to location of player
+					set {King.Checks.Speed.WaterSpeedY2.%player%} to y location of player
+					if (distance between {King.Checks.Speed.WaterSpeed1.%player%} and {King.Checks.Speed.WaterSpeed2.%player%}) - ({King.Checks.Speed.WaterSpeedY1.%player%} - {King.Checks.Speed.WaterSpeedY2.%player%}) >= {King.Checks.SpeedWater.%player%}:
+						if {King.Booleans.GhostMode.Enabled} is not true:
+							teleport player to {King.tpUtils.Speed.%player%}
+						add 1 to {King.Checks.Speed.VLLevel.%player%}
+						send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%Speed&f(vl&f.%{King.Checks.Speed.VLLevel.%player%}%) &f: Gracz plywa zbyt szybko / nieproporcjonalnie to wzoru (%{King.Checks.Speed.GroundType.%player%}%) &c[ %distance between {King.Checks.Speed.WaterSpeed1.%player%} and {King.Checks.Speed.WaterSpeed2.%player%}%/%{King.Checks.SpeedWater.%player%}% ]" to all ops
+					if {King.Checks.Speed.WaterSpeedY1.%player%} - {King.Checks.Speed.WaterSpeedY2.%player%} <= -0.15:
+						if {King.Booleans.GhostMode.Enabled} is not true:
+							teleport player to {King.tpUtils.Speed.%player%}
+						add 1 to {King.Checks.Speed.VLLevel.%player%}
+						if {King.Booleans.Notify.Enabled} is true:
+							send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%Speed&f(vl&f.%{King.Checks.Speed.VLLevel.%player%}%) &f: Gracz plywa zbyt szybko / nieproporcjonalnie to wzoru (%{King.Checks.Speed.GroundType.%player%}%) &c[ %distance between {King.Checks.Speed.WaterSpeed1.%player%} and {King.Checks.Speed.WaterSpeed2.%player%}%/%{King.Checks.SpeedWater.%player%}% ]" to all ops
+#The Future of detect ~AroveDev
