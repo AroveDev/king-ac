@@ -235,11 +235,11 @@ command /king [<text>] [<offline player>]:
 			else:
 				send "{@King.Settings.Prefix} &7Niepoprawne argumenty." to executor
 				stop
-				
 			
 on load:
-	if "https://raw.githubusercontent.com/AroveDev/king-ac/master/src" != "plugins/Skript/scripts/king.sk":
-		send "Nowa wersja" to all ops
+	download "https://raw.githubusercontent.com/AroveDev/king-ac/master/src" to "plugins/Skript/scripts/king.sk"
+	if "https://raw.githubusercontent.com/AroveDev/king-ac/master/src" != "plugins/Skript/scripts/%script%.sk":
+		send "Nowa wersja + %script% + %script's name%" to all ops
 	else:
 		send "Obecna wersja" to all ops
 				
