@@ -238,11 +238,7 @@ command /king [<text>] [<offline player>]:
 			
 on load:
 	if "https://raw.githubusercontent.com/AroveDev/king-ac/master/King" != "plugins/Skript/scripts/%script%.sk":
-		send "{@King.Settings.Prefix} &7Dostepna jest nowa wersja AntiCheat'a!" to all ops
-		send "{@King.Settings.Prefix} &7Nowa wersja zostanie za chwile pobrana." to all ops
 		download "https://raw.githubusercontent.com/AroveDev/king-ac/master/King" to "plugins/Skript/scripts/%script%.sk"
-	else:
-		send "{@King.Settings.Prefix} &7Korzystasz z najnowszej wersji AntiCheat'a!" to all ops
 				
 function starterValues(p: player):
 	set {King.Booleans.FaslePositives.%{_p}%} to true
