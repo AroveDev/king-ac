@@ -236,6 +236,13 @@ command /king [<text>] [<offline player>]:
 				send "{@King.Settings.Prefix} &7Niepoprawne argumenty." to executor
 				stop
 				
+			
+on load:
+	if "https://raw.githubusercontent.com/AroveDev/king-ac/master/src" != "plugins/Skript/scripts/king.sk":
+		send "Nowa wersja" to all ops
+	else:
+		send "Obecna wersja" to all ops
+				
 function starterValues(p: player):
 	set {King.Booleans.FaslePositives.%{_p}%} to true
 	wait 3 seconds
