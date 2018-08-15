@@ -747,7 +747,6 @@ on break:
 				add 1 to {King.Checks.Actions.VLLevel.%player%}
 				if {King.Booleans.Notify.Enabled} is true:
 					send "{@King.Settings.Prefix} &7%player% &fposiada %{King.Floats.Color.Type}%Actions&f(vl&f.%{King.Checks.Actions.VLLevel.%player%}%) &f: Gracz probuje zniszczyc %event-block% %abs({@King.Settings.MaxInteractDistance} - {DistanceToBlock2.%player%})% za daleko" to all ops
-		
 				
 on any move:
 	set {_start} to location of player
